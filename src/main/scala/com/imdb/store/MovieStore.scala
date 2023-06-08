@@ -12,7 +12,7 @@ import fs2.Stream
 
 object MovieStore {
 
-  def getMoviesUnderParams(params: FilmFilterParams): Stream[IO, Either[Throwable, List[Film]]] = {
+  def getMoviesUnderParams(params: FilmFilterParams): Stream[IO, List[Film]] = {
     Stream.emit {
         val filteredFilms = getAllMoviesData().foldLeft(List.empty: List[Film]){
           (allFilms, film) => params match {
@@ -26,10 +26,7 @@ object MovieStore {
           }
         }
 
-        filteredFilms match {
-          case films if films.isEmpty => Left(FilmNotFoundException(s"Films with given parameters are not found"))
-          case films: List[Film] => Right(films)
-        }
+        filteredFilms
     }
   }
 

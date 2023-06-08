@@ -2,8 +2,8 @@ package com.imdb.rest
 
 
 import sttp.tapir.generic.auto._
-import io.circe.{Json=> CirceJson}
-import io.circe.parser.{parse=> circeParse}
+import io.circe.{Json => CirceJson}
+import io.circe.parser.{parse => circeParse}
 import cats.effect.IO
 import com.imdb.Domain.{Film, FilmFilterParams}
 import com.imdb.domain.Exceptions.InvalidInputException
@@ -15,19 +15,22 @@ import sttp.tapir.{Endpoint, endpoint}
 import sttp.tapir.json.circe._
 import sttp.tapir.server.ServerEndpoint
 import io.circe.generic.auto._
+import io.circe.syntax.EncoderOps
 import sttp.tapir._
-import sttp.capabilities.
+import sttp.capabilities.Streams
+import sttp.tapir.typelevel.ParamConcat._
+import sttp.tapir.typelevel.ParamsAsArgs._
+
 object MovieEndpoints {
 
-  val moviesFilterEndpoint: Endpoint[Unit, Json, Unit, Stream[IO, Either[Throwable, List[Film]]], Any] =
+  val moviesFilterEndpoint: Endpoint[Json, Unit, Stream[IO, List[Film]], Any] =
     endpoint.get
       .in("movies")
       .in(jsonBody[Json])
-      .out(streamBody[IO, Either[Throwable, List[Film]]]()) // yet to be completed
+      .out(streamBody(new Streams[Any])(Schema.derived[List[Film]], CodecFormat.Json())) // yet to be completed
 
 
-  //  ServerEndpoint[Unit, Unit, Stream[IO, Film], Any, IO]
-  val filmsServerEndpoint:  ServerEndpoint.Full[Unit, Unit, Json, Unit, Stream[IO, Either[Throwable, List[Film]]], Any, IO]  =
+  val filmsServerEndpoint:  ServerEndpoint[Json, Unit, Stream[IO, List[Film]], Any, IO]  =
     moviesFilterEndpoint.serverLogic { filmFilterParams =>
 
       // Process the request and return a list of films or an exception
