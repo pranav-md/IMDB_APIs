@@ -12,22 +12,27 @@ import fs2.Stream
 
 object MovieStore {
 
-  def getMoviesUnderParams(params: FilmFilterParams): Stream[IO, List[Film]] = {
+  def getMoviesUnderParamsAsStream(params: FilmFilterParams): Stream[IO, List[Film]] = {
     Stream.emit {
-        val filteredFilms = getAllMoviesData().foldLeft(List.empty: List[Film]){
-          (allFilms, film) => params match {
-            case FilmFilterParams(Some(name), Some(year))
-              if film.original_title.equals(name) && film.year.equals(year) => allFilms :+ film
-            case FilmFilterParams(_, Some(year))
-              if film.year.equals(year) => allFilms :+ film
-            case FilmFilterParams(Some(name), _)
-              if film.original_title.equals(name) => allFilms :+ film
-            case FilmFilterParams(_, _) => allFilms
-          }
-        }
-
-        filteredFilms
+      getMoviesUnderParams(params)
     }
+  }
+
+  def getMoviesUnderParams(params: FilmFilterParams): List[Film] = {
+    val filteredFilms = getAllMoviesData().foldLeft(List.empty: List[Film]) {
+      (allFilms, film) =>
+        params match {
+          case FilmFilterParams(Some(name), Some(year))
+            if film.original_title.equals(name) && film.year.equals(year) => allFilms :+ film
+          case FilmFilterParams(None, Some(year))
+            if film.year.equals(year) => allFilms :+ film
+          case FilmFilterParams(Some(name), None)
+            if film.original_title.equals(name) => allFilms :+ film
+          case FilmFilterParams(_, _) => allFilms
+        }
+    }
+
+    filteredFilms
   }
 
   def streamFilms(): Stream[IO, Film] = {

@@ -16,4 +16,5 @@ package object domain {
     implicit val filmParamDecoder = deriveDecoder[FilmFilterParams]
     implicit val filmParamEncoder = deriveEncoder[FilmFilterParams]
   }
+
 }

@@ -17,4 +17,5 @@ object Domain {
 
 
   case class FilmFilterParams(name: Option[String] = None, year: Option[Int] = None)
+
 }

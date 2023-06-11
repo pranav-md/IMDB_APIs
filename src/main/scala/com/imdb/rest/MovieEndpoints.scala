@@ -23,20 +23,20 @@ import sttp.tapir.typelevel.ParamsAsArgs._
 
 object MovieEndpoints {
 
-  val moviesFilterEndpoint: Endpoint[Json, Unit, Stream[IO, List[Film]], Any] =
-    endpoint.get
-      .in("movies")
-      .in(jsonBody[Json])
-      .out(streamBody(new Streams[Any])(Schema.derived[List[Film]], CodecFormat.Json())) // yet to be completed
+  val moviesFilterEndpoint: Endpoint[Json, Unit, Stream[IO, List[Film]], Any] = ???
+  //    endpoint.get
+  //      .in("movies")
+  //      .in(jsonBody[Json])
+  //      .out(streamBody(new Streams[Any])(Schema.derived[List[Film]], CodecFormat.Json())) // yet to be completed
 
 
-  val filmsServerEndpoint:  ServerEndpoint[Json, Unit, Stream[IO, List[Film]], Any, IO]  =
+  val filmsServerEndpoint: ServerEndpoint[Json, Unit, Stream[IO, List[Film]], Any, IO] =
     moviesFilterEndpoint.serverLogic { filmFilterParams =>
 
       // Process the request and return a list of films or an exception
       filmParamDecoder.decodeJson(circeParse(filmFilterParams.toString).getOrElse(CirceJson.Null)) match {
-        case Right(filmFilter) => IO.pure(Right(MovieStore.getMoviesUnderParams(filmFilter)))
-        case _ => IO.raiseError( InvalidInputException("Invalid input"))
+        case Right(filmFilter) => IO.pure(Right(MovieStore.getMoviesUnderParamsAsStream(filmFilter)))
+        case _ => IO.raiseError(InvalidInputException("Invalid input"))
       }
     }
 
